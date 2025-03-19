@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-config
+  namespace: logging
+data:
+  vector.yaml: |
+    data_dir: /var/lib/vector
+    api:
+      enabled: true
+      address: 0.0.0.0:8686
+
+    sources:
+      kubernetes_logs:
+        type: kubernetes_logs
+        self_node_name: "${VECTOR_NODE_NAME}"
+
+    sinks:
+      logs_to_redis:
+        type: redis
+        inputs: ["kubernetes_logs"]
+        url: "redis://redis-service:6379/0"
+        key: "kubernetes_logs"
+        data_type: list
+        encoding:
+          codec: json
